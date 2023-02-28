@@ -2,75 +2,58 @@ package notificationService
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
-	"time"
 	"tosinjs/reminder-service/internal/entity/errorEntity"
 	"tosinjs/reminder-service/internal/entity/notificationEntity"
-	"tosinjs/reminder-service/internal/repository/notificationRepo"
 
-	"firebase.google.com/go/v4/messaging"
+	amqp "github.com/rabbitmq/amqp091-go"
 )
 
 type notificationService struct {
-	notifRepo notificationRepo.NotificationRepository
-	fcm       *messaging.Client
-	ctx       context.Context
+	ctx   context.Context
+	nq    amqp.Queue
+	nChan *amqp.Channel
 }
 
 type NotificationService interface {
-	CreateNotification(notificationEntity.CreateNotificationReq) *errorEntity.LayerError
-	GetNotifications(userId string) ([]notificationEntity.Notification, *errorEntity.LayerError)
-	SendNotification(notifToken, message string) *errorEntity.LayerError
-	SendBatchNotifications(notifTokens []string, message string) *errorEntity.LayerError
+	PublishNotification(notificationEntity.CreateNotificationReq) *errorEntity.LayerError
 }
 
-func New(notifRepo notificationRepo.NotificationRepository, fcm *messaging.Client, ctx context.Context) NotificationService {
+func New(
+	ctx context.Context,
+	nq amqp.Queue,
+	nChan *amqp.Channel,
+) NotificationService {
 	return notificationService{
-		notifRepo: notifRepo,
-		fcm:       fcm,
-		ctx:       ctx,
+		ctx:   ctx,
+		nq:    nq,
+		nChan: nChan,
 	}
 }
 
-func (n notificationService) CreateNotification(notif notificationEntity.CreateNotificationReq) *errorEntity.LayerError {
-	notification := notificationEntity.Notification{
-		UserId:       notif.UserId,
-		Notification: notif.Notification,
-		CreatedAt:    time.Now().UTC(),
-	}
-	return n.notifRepo.CreateNotification(notification)
-}
-
-func (n notificationService) GetNotifications(userId string) ([]notificationEntity.Notification, *errorEntity.LayerError) {
-	return n.notifRepo.GetNotifications(userId)
-}
-
-func (n notificationService) SendNotification(notifToken, message string) *errorEntity.LayerError {
-	res, err := n.fcm.Send(n.ctx, &messaging.Message{
-		Token: notifToken,
-		Data: map[string]string{
-			message: message,
-		},
-	})
-
+func (n notificationService) PublishNotification(
+	notification notificationEntity.CreateNotificationReq,
+) *errorEntity.LayerError {
+	body, err := json.Marshal(notification)
 	if err != nil {
 		return errorEntity.InternalServerError("service", err)
 	}
-	fmt.Println("Notification Sent:", res)
-	return nil
-}
-
-func (n notificationService) SendBatchNotifications(notifTokens []string, message string) *errorEntity.LayerError {
-	res, err := n.fcm.SendMulticast(n.ctx, &messaging.MulticastMessage{
-		Data: map[string]string{
-			message: message,
+	err = n.nChan.PublishWithContext(
+		n.ctx,
+		"",
+		n.nq.Name,
+		false,
+		false,
+		amqp.Publishing{
+			ContentType: "text/plain",
+			Body:        body,
 		},
-		Tokens: notifTokens,
-	})
-
+	)
 	if err != nil {
+		fmt.Println(err)
 		return errorEntity.InternalServerError("service", err)
 	}
-	fmt.Println("Notification Sent:", res)
+	fmt.Println("published")
 	return nil
 }

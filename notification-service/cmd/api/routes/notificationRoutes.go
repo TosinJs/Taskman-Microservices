@@ -1,12 +1,12 @@
 package routes
 
 import (
-	"tosinjs/reminder-service/cmd/api/handlers/notificationHandler"
-	"tosinjs/reminder-service/cmd/api/middleware/authMiddleware"
-	"tosinjs/reminder-service/internal/service/authService"
-	"tosinjs/reminder-service/internal/service/notificationService"
-	"tosinjs/reminder-service/internal/service/notificationTokenService"
-	"tosinjs/reminder-service/internal/service/validationService"
+	"tosinjs/notification-service/cmd/api/handlers/notificationHandler"
+	"tosinjs/notification-service/cmd/api/middleware/authMiddleware"
+	"tosinjs/notification-service/internal/service/authService"
+	"tosinjs/notification-service/internal/service/notificationService"
+	"tosinjs/notification-service/internal/service/notificationTokenService"
+	"tosinjs/notification-service/internal/service/validationService"
 
 	"github.com/gin-gonic/gin"
 )

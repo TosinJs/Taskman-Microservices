@@ -9,14 +9,11 @@ import (
 	"os/signal"
 	"time"
 	"tosinjs/reminder-service/cmd/api/routes"
-	firebaseinit "tosinjs/reminder-service/internal/firebase-init"
 	mongoinit "tosinjs/reminder-service/internal/mongo-init"
-	nmRepo "tosinjs/reminder-service/internal/repository/notificationRepo/mongoRepo"
-	ntmRepo "tosinjs/reminder-service/internal/repository/notificationTokenRepo/mongoRepo"
+	rabbitmqinit "tosinjs/reminder-service/internal/rabbitmq-init"
 	tmRepo "tosinjs/reminder-service/internal/repository/todoRepo/mongoRepo"
 	"tosinjs/reminder-service/internal/service/authService"
 	"tosinjs/reminder-service/internal/service/notificationService"
-	"tosinjs/reminder-service/internal/service/notificationTokenService"
 	"tosinjs/reminder-service/internal/service/reminderService"
 	"tosinjs/reminder-service/internal/service/todoService"
 	"tosinjs/reminder-service/internal/service/validationService"
@@ -24,9 +21,6 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/go-co-op/gocron"
-	"go.mongodb.org/mongo-driver/bson"
-	"go.mongodb.org/mongo-driver/mongo"
-	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
 func Setup() {
@@ -36,7 +30,7 @@ func Setup() {
 		os.Exit(1)
 	}
 
-	//Database Setup
+	//Database Init
 	mc, err := mongoinit.Init(context.Background(), config.MONGO_URI)
 	if err != nil {
 		fmt.Printf("mongo error: %v", err)
@@ -48,57 +42,41 @@ func Setup() {
 
 	//Mongo Collections
 	todoCollection := mongoDB.Collection("todo")
-	notifTokenCollection := mongoDB.Collection("notificationTokens")
-	notifCollection := mongoDB.Collection("notifications")
-	//Notifications should expire after 1 week
-	const hours_in_a_week = 24 * 7
-	index := mongo.IndexModel{
-		Keys: bson.M{"createdAt": 1},
-		Options: options.Index().SetExpireAfterSeconds(
-			int32((time.Hour * 2 * hours_in_a_week).Seconds()),
-		),
-	}
-	_, err = notifCollection.Indexes().CreateOne(context.Background(), index)
-	if err != nil {
-		fmt.Printf("mongo index error: %v", err)
-		os.Exit(1)
-	}
 
-	//Notification Tokens Live For 3 weeks
-	index = mongo.IndexModel{
-		Keys: bson.M{"timestamp": 1},
-		Options: options.Index().SetExpireAfterSeconds(
-			int32((time.Hour * 2 * hours_in_a_week).Seconds()),
-		),
-	}
-	_, err = notifTokenCollection.Indexes().CreateOne(context.Background(), index)
+	//RabbitMQ Init
+	amqpConn, err := rabbitmqinit.Init(config.RABBITMQURI)
 	if err != nil {
-		fmt.Printf("mongo index error: %v", err)
+		log.Fatalf("RabbitMq Error: %v", err)
 		os.Exit(1)
 	}
-
-	//Firebase Setup
-	fcmClient, err := firebaseinit.Init(context.Background())
+	defer amqpConn.Close()
+	ch, err := amqpConn.Channel()
 	if err != nil {
-		fmt.Printf("error connecting to firebase: %v", err)
+		log.Fatalf("RabbitMq Error: %v", err)
 		os.Exit(1)
 	}
+	defer ch.Close()
+	notifQueue, err := ch.QueueDeclare(
+		"taskman-notififcations",
+		false,
+		false,
+		false,
+		false,
+		nil,
+	)
 
 	//GoCron Setup
 	s := gocron.NewScheduler(time.UTC)
 	s.StartAsync()
 
 	//Repo Setup
-	notifRepo := nmRepo.New(notifCollection, context.Background())
-	notifTokenRepo := ntmRepo.New(notifTokenCollection, context.Background())
 	todoRepo := tmRepo.New(todoCollection, context.Background())
 
 	//Service Setup
 	authSVC := authService.New(config.JWTSECRET)
 	validationSVC := validationService.New()
-	notifSVC := notificationService.New(notifRepo, fcmClient, context.Background())
-	notifTokenSVC := notificationTokenService.New(notifTokenRepo)
-	reminderSVC := reminderService.New(s, notifSVC, notifTokenSVC)
+	notifSVC := notificationService.New(context.Background(), notifQueue, ch)
+	reminderSVC := reminderService.New(s, notifSVC)
 	todoSVC := todoService.New(todoRepo, reminderSVC)
 
 	//Routes Setup
@@ -106,7 +84,6 @@ func Setup() {
 	v1 := r.Group("/api/v1")
 
 	routes.TodoRoutes(v1, todoSVC, authSVC, validationSVC)
-	routes.NotificationRoutes(v1, notifSVC, notifTokenSVC, authSVC, validationSVC)
 
 	v1.GET("/ping", func(c *gin.Context) {
 		c.JSON(http.StatusOK, "pong")

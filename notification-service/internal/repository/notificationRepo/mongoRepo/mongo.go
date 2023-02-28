@@ -2,9 +2,9 @@ package mongoRepo
 
 import (
 	"context"
-	"tosinjs/reminder-service/internal/entity/errorEntity"
-	"tosinjs/reminder-service/internal/entity/notificationEntity"
-	"tosinjs/reminder-service/internal/repository/notificationRepo"
+	"tosinjs/notification-service/internal/entity/errorEntity"
+	"tosinjs/notification-service/internal/entity/notificationEntity"
+	"tosinjs/notification-service/internal/repository/notificationRepo"
 
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"

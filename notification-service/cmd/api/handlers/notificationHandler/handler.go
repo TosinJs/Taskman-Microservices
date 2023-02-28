@@ -2,12 +2,12 @@ package notificationHandler
 
 import (
 	"net/http"
-	"tosinjs/reminder-service/internal/entity/notificationEntity"
-	"tosinjs/reminder-service/internal/entity/notificationTokenEntity"
-	"tosinjs/reminder-service/internal/entity/responseEntity"
-	"tosinjs/reminder-service/internal/service/notificationService"
-	"tosinjs/reminder-service/internal/service/notificationTokenService"
-	"tosinjs/reminder-service/internal/service/validationService"
+	"tosinjs/notification-service/internal/entity/notificationEntity"
+	"tosinjs/notification-service/internal/entity/notificationTokenEntity"
+	"tosinjs/notification-service/internal/entity/responseEntity"
+	"tosinjs/notification-service/internal/service/notificationService"
+	"tosinjs/notification-service/internal/service/notificationTokenService"
+	"tosinjs/notification-service/internal/service/validationService"
 
 	"github.com/gin-gonic/gin"
 )

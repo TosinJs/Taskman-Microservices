@@ -1,8 +1,8 @@
 package notificationTokenRepo
 
 import (
-	"tosinjs/reminder-service/internal/entity/errorEntity"
-	"tosinjs/reminder-service/internal/entity/notificationTokenEntity"
+	"tosinjs/notification-service/internal/entity/errorEntity"
+	"tosinjs/notification-service/internal/entity/notificationTokenEntity"
 )
 
 type NotificationTokenRepository interface {

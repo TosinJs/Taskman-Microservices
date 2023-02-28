@@ -5,15 +5,13 @@ import (
 	"time"
 	"tosinjs/reminder-service/internal/entity/notificationEntity"
 	"tosinjs/reminder-service/internal/service/notificationService"
-	"tosinjs/reminder-service/internal/service/notificationTokenService"
 
 	"github.com/go-co-op/gocron"
 )
 
 type reminderService struct {
-	sch           *gocron.Scheduler
-	notifSVC      notificationService.NotificationService
-	notifTokenSVC notificationTokenService.NotificationTokenService
+	sch      *gocron.Scheduler
+	notifSVC notificationService.NotificationService
 }
 
 type ReminderService interface {
@@ -25,32 +23,24 @@ type ReminderService interface {
 func New(
 	sch *gocron.Scheduler,
 	notifSVC notificationService.NotificationService,
-	notifTokenSVC notificationTokenService.NotificationTokenService,
 ) ReminderService {
 	return reminderService{
-		sch:           sch,
-		notifSVC:      notifSVC,
-		notifTokenSVC: notifTokenSVC,
+		sch:      sch,
+		notifSVC: notifSVC,
 	}
 }
 
 func (r reminderService) CreateReminder(userId, todoId, message string, time time.Time) {
-	reminderFunc := func() {
-		svcErr := r.notifSVC.CreateNotification(notificationEntity.CreateNotificationReq{
+	reminderFunc := func() error {
+		err := r.notifSVC.PublishNotification(notificationEntity.CreateNotificationReq{
 			UserId:       userId,
 			Notification: message,
 		})
-		if svcErr != nil {
-			fmt.Println(svcErr)
+		if err != nil {
+			fmt.Println(err, "here")
+			return err
 		}
-		notifTokens, svcErr := r.notifTokenSVC.GetNotificationTokens(userId)
-		if svcErr != nil {
-			fmt.Println(svcErr)
-		}
-		svcErr = r.notifSVC.SendBatchNotifications(notifTokens, message)
-		if svcErr != nil {
-			fmt.Println(svcErr)
-		}
+		return nil
 	}
 	job, err := r.sch.Every(1).Minutes().Tag(todoId).StartAt(time).Do(reminderFunc)
 	if err != nil {
