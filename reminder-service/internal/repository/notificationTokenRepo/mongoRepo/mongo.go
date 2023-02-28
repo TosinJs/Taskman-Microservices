@@ -57,5 +57,8 @@ func (m mongoRepo) RegisterNotificationId(notifDetails notificationTokenEntity.N
 		return errorEntity.InternalServerError("repo", res.Err())
 	}
 	_, err := m.mColl.UpdateOne(m.ctx, filter, bson.M{"$set": bson.M{"timestamp": time.Now().UTC()}})
-	return errorEntity.InternalServerError("repo", err)
+	if err != nil {
+		return errorEntity.InternalServerError("repo", err)
+	}
+	return nil
 }

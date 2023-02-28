@@ -36,7 +36,6 @@ func New(
 
 func (r reminderService) CreateReminder(userId, todoId, message string, time time.Time) {
 	reminderFunc := func() {
-		fmt.Println("got heres")
 		svcErr := r.notifSVC.CreateNotification(notificationEntity.CreateNotificationReq{
 			UserId:       userId,
 			Notification: message,

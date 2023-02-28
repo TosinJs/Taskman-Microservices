@@ -43,7 +43,7 @@ func (t todoService) CreateTodo(req todoEntity.CreateTodoReq) *errorEntity.Layer
 			"service", "Inavlid Time Input: Due", err,
 		)
 	}
-	if int(due.Sub(now).Minutes()) < 2 {
+	if int(due.Sub(now).Minutes()) < 1 {
 		return errorEntity.BadRequestError(
 			"service", "due has to be due at least 1 minute from now", fmt.Errorf("inavlid time entry"),
 		)
@@ -57,7 +57,7 @@ func (t todoService) CreateTodo(req todoEntity.CreateTodoReq) *errorEntity.Layer
 				"service", "Inavlid Time Input: RemindMe", err,
 			)
 		}
-		if int(remindMe.Sub(now).Minutes()) < 2 {
+		if int(remindMe.Sub(now).Minutes()) < 1 {
 			return errorEntity.BadRequestError(
 				"service",
 				"remindMe has to be due at least 1 minute from now",
@@ -77,7 +77,7 @@ func (t todoService) CreateTodo(req todoEntity.CreateTodoReq) *errorEntity.Layer
 	}
 
 	todoId, svcErr := t.todoRepo.CreateTodo(todo)
-	if err != nil {
+	if svcErr != nil {
 		return svcErr
 	}
 

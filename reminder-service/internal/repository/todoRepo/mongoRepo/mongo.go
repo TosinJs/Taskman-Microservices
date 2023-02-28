@@ -26,7 +26,10 @@ func New(mColl *mongo.Collection, ctx context.Context) todoRepo.TodoRepository {
 func (m mongoRepo) CreateTodo(todo todoEntity.Todo) (string, *errorEntity.LayerError) {
 	todo.Id = primitive.NewObjectID()
 	_, err := m.mColl.InsertOne(m.ctx, todo)
-	return todo.Id.String(), errorEntity.InternalServerError("repo", err)
+	if err != nil {
+		return "", errorEntity.InternalServerError("repo", err)
+	}
+	return todo.Id.String(), nil
 }
 
 func (m mongoRepo) GetTodos(userId string) ([]todoEntity.Todo, *errorEntity.LayerError) {
@@ -81,7 +84,10 @@ func (m mongoRepo) DeleteTodo(userId, todoId string) *errorEntity.LayerError {
 	}
 	filter := bson.M{"_id": todoIdHex, "userId": userId}
 	_, err = m.mColl.DeleteOne(m.ctx, filter)
-	return errorEntity.InternalServerError("repo", err)
+	if err != nil {
+		return errorEntity.InternalServerError("repo", err)
+	}
+	return nil
 }
 
 func (m mongoRepo) MarkAsDone(userId, todoId string) *errorEntity.LayerError {

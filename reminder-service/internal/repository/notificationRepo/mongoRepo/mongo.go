@@ -26,7 +26,10 @@ func New(mColl *mongo.Collection, ctx context.Context) notificationRepo.Notifica
 func (m mongoRepo) CreateNotification(notif notificationEntity.Notification) *errorEntity.LayerError {
 	notif.ID = primitive.NewObjectID()
 	_, err := m.mColl.InsertOne(m.ctx, notif)
-	return errorEntity.InternalServerError("repo", err)
+	if err != nil {
+		return errorEntity.InternalServerError("repo", err)
+	}
+	return nil
 }
 
 func (m mongoRepo) GetNotifications(userId string) ([]notificationEntity.Notification, *errorEntity.LayerError) {

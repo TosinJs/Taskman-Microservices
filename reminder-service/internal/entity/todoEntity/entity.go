@@ -17,11 +17,11 @@ type CreateTodoReq struct {
 
 type Todo struct {
 	Id        primitive.ObjectID `bson:"_id" json:"id,omitempty"`
-	UserId    string             `json:"userId,omitempty"`
-	Todo      string             `json:"todo,omitempty"`
-	CreatedAt time.Time          `json:"createdAt,omitempty"`
-	Due       time.Time          `json:"due,omitempty"`
-	RemindMe  time.Time          `json:"remindMe,omitempty"`
-	Recurring bool               `json:"recurring"`
-	Done      bool               `json:"done"`
+	UserId    string             `bson:"userId" json:"userId,omitempty"`
+	Todo      string             `bson:"todo" json:"todo,omitempty"`
+	CreatedAt time.Time          `bson:"createdAt" json:"createdAt,omitempty"`
+	Due       time.Time          `bson:"due" json:"due,omitempty"`
+	RemindMe  time.Time          `bson:"remindMe" json:"remindMe,omitempty"`
+	Recurring bool               `bson:"recurring" json:"recurring"`
+	Done      bool               `bson:"done" json:"done"`
 }
