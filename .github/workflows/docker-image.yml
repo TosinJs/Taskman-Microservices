@@ -1,0 +1,42 @@
+name: Taskman-Microservices CI
+
+on:
+  push:
+    branches: [ "master" ]
+  pull_request:
+    branches: [ "master" ]
+
+jobs:
+
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Login to Docker Hub
+      uses: docker/login-action@v2
+      with:
+        username: ${{ secrets.DOCKERHUB_USERNAME }}
+        password: ${{ secrets.DOCKERHUB_TOKEN }}
+        
+    - name: Build the First Docker Image
+      run: docker build ./authman-service --tag ${{ secrets.DOCKERHUB_USERNAME }}/backend-authman:v1
+    - name: Docker Push
+      run: docker push ${{ secrets.DOCKERHUB_USERNAME }}/backend-authman:v1
+      
+    - name: Build the Second Docker Image
+      run: docker build ./notification-service --tag ${{ secrets.DOCKERHUB_USERNAME }}/backend-notifications:v1
+    - name: Docker Push
+      run: docker push ${{ secrets.DOCKERHUB_USERNAME }}/backend-notifications:v1
+      
+    - name: Build the Third Docker Image
+      run: docker build ./reminder-service --tag ${{ secrets.DOCKERHUB_USERNAME }}/backend-taskman:v1
+    - name: Docker Push
+      run: docker push ${{ secrets.DOCKERHUB_USERNAME }}/backend-taskman:v1
+      
+    - name: Build the Proxy Server Docker Image
+      run: docker build -t reverseproxy ./reverseproxy --tag ${{ secrets.DOCKERHUB_USERNAME }}/reverseproxy:v1
+    - name: Docker Push
+      run: docker push ${{ secrets.DOCKERHUB_USERNAME }}/reverseproxy:v1
