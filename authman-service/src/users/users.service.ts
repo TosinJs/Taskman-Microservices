@@ -7,7 +7,7 @@ import { RefreshUserPasswordDto } from './dto/resfresh-password.dto';
 import { EncryptService } from './encrypt/encrypt.service';
 import { JwtTokenService } from './jwt/jwt.service';
 import { MailService } from './mail/mail.service';
-import { DBService } from './db.service';
+import { DBService } from './database/db.service';
 
 @Injectable()
 export class UsersService {
@@ -24,7 +24,7 @@ export class UsersService {
       payload,
       '365d',
     );
-    const accessToken = await this.jwtService.generateAuthToken(payload, '1m');
+    const accessToken = await this.jwtService.generateAuthToken(payload, '25m');
     return { idToken, refreshToken, accessToken, tokenType: 'Bearer' };
   }
 

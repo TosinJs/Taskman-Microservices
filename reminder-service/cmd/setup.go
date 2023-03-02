@@ -19,6 +19,7 @@ import (
 	"tosinjs/reminder-service/internal/service/validationService"
 	"tosinjs/reminder-service/utils"
 
+	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	"github.com/go-co-op/gocron"
 )
@@ -81,6 +82,7 @@ func Setup() {
 
 	//Routes Setup
 	r := gin.New()
+	r.Use(cors.Default())
 	v1 := r.Group("/api/v1")
 
 	routes.TodoRoutes(v1, todoSVC, authSVC, validationSVC)

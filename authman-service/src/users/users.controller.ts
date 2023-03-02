@@ -5,7 +5,9 @@ import { LoginUserDto } from './dto/login-user.dto';
 import { RefreshTokenDto } from './dto/refresh-token.dto';
 import { RefreshUserPasswordDto } from './dto/resfresh-password.dto';
 import { EmailTokenDto } from './dto/email-token.dto';
+import { ApiTags } from '@nestjs/swagger';
 
+@ApiTags('Users')
 @Controller('users')
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}

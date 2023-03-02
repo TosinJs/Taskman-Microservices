@@ -1,42 +1,38 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="200" alt="Nest Logo" /></a>
-</p>
-
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
-
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://coveralls.io/github/nestjs/nest?branch=master" target="_blank"><img src="https://coveralls.io/repos/github/nestjs/nest/badge.svg?branch=master#9" alt="Coverage" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+## Authman Api
 
 ## Description
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+This repository contains the API logic for an Authentication and Authorization service. 
 
-## Installation
+## Deployment
+A live deployment of this application can be found @ https://f-c3nm.onrender.com
+
+## Documentation
+The documentation of this application can be found @:
+<li>Open Api @ https://authman-api.onrender.com/api/docs</li>
+<li>Postman @ https://github.com/TosinJs/authman/blob/master/Authman.postman_collection.json </li>
+
+## Run the Application Locally
 
 ```bash
+# Clone the repository
+$ git clone https://github.com/TosinJs/food-api.git
+
+# Install dependencies
 $ npm install
-```
 
-## Running the app
+# configuration 
+# Create .env file in the root folder
+$ touch .env
 
-```bash
-# development
-$ npm run start
+# populate the .env file with your files
+$ MONGO_URI = "your mongo URI"
+$ REDIS_URL = "Your Redis URL"
+$ SMTP_HOST = "mail host"
+$ SMTP_USER = "mail user"
+$ SMTP_PASS = "mail password"
+$ SMTP_PORT = "mail port"
+$ SMTP_SERVICE = "mail service"
 
 # watch mode
 $ npm run start:dev
@@ -45,29 +41,24 @@ $ npm run start:dev
 $ npm run start:prod
 ```
 
-## Test
+## The Application
 
-```bash
-# unit tests
-$ npm run test
+### Funtionality
+Users can 
+<li>Create account</li>
+<li>Login</li>
+<li>Email Verification</li>
+<li>Password Reset</li>
+<li>ROLE Based Access</li>
 
-# e2e tests
-$ npm run test:e2e
+### Details
+<p>On signup users are sent a verification Email, without emailverification, their token roles are limited</p>
+<p>Verified users have access to three tokens</p>
+	- ID Token
+	- Auth Token
+	- Refresh Token
+<p>The ID Token is used to identify the users, all users have access to this token and it has a life span of 24h</p>
+<p>The Auth Token is used for Role Based access. These tokens grant users special access to specific resources. The life span of the auth tokens are about 20 minutes</p>
+<p>The Refresh Tokens are used to generate a new set of tokens when the user submits a token that is valid but expired. Refresh tokens have a life span of 3 months. The refresh tokens are stored in a redis database for validation purposes and to enable token revocation.
 
-# test coverage
-$ npm run test:cov
-```
 
-## Support
-
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
-
-## Stay in touch
-
-- Author - [Kamil Myśliwiec](https://kamilmysliwiec.com)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
-
-## License
-
-Nest is [MIT licensed](LICENSE).

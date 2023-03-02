@@ -1,0 +1,82 @@
+version: '3'
+services:
+  # nginx: 
+  #   image: reverseproxy
+  #   build: ./reverseproxy
+  #   ports:
+  #     - "8080:8080"
+  #     - "8081:8081"
+  #     - "8082:8082"
+  #   depends_on:
+  #     - backend-authman
+  #     - backend-taskman
+  #     - backend-notifications
+  mongo:
+    image: mongo
+    restart: always
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=root
+      - MONGO_INITDB_ROOT_PASSWORD=password
+    volumes:
+      - mongo-db:/data/db
+
+  redis:
+    image: redis:6.2-alpine
+    restart: always
+    command: redis-server --save 20 1 --loglevel warning --requirepass password
+    volumes: 
+      - redis-db:/data/cache
+
+  rabbitmq: 
+    image: rabbitmq:3.8-alpine
+    volumes: 
+      - ~/.docker-conf/rabbitmq/data/:/var/lib/rabbitmq/
+      - ~/.docker-conf/rabbitmq/log/:/var/log/rabbitmq
+    healthcheck:
+      test: rabbitmq-diagnostics -q ping
+      interval: 30s
+      timeout: 30s
+      retries: 5
+
+  backend-authman:
+    image: backend-authman
+    build: ./authman-service
+    ports:
+      - "80:8080"
+    depends_on:
+      - mongo
+      - redis
+    env_file:
+      - .env
+
+  backend-taskman:
+    image: backend-taskman
+    build: ./reminder-service
+    ports:
+      - "81:2000"
+    depends_on:
+      authman:
+        condition: service_started
+      mongo:
+        condition: service_started
+      rabbitmq: 
+        condition: service_healthy
+
+  backend-notifications:
+    image: backend-notifications
+    build: ./notification-service
+    ports:
+      - "82:4000"
+    depends_on:
+      authman:
+        condition: service_started
+      mongo:
+        condition: service_started
+      rabbitmq: 
+        condition: service_healthy
+
+volumes:
+  mongo-db:
+    driver: local
+  redis-db:
+    driver: local

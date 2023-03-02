@@ -20,6 +20,7 @@ import (
 	"tosinjs/notification-service/internal/service/validationService"
 	"tosinjs/notification-service/utils"
 
+	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -146,6 +147,7 @@ func Setup() {
 
 	//Routes Setup
 	r := gin.New()
+	r.Use(cors.Default())
 	v1 := r.Group("/api/v1")
 
 	routes.NotificationRoutes(v1, notifSVC, notifTokenSVC, authSVC, validationSVC)

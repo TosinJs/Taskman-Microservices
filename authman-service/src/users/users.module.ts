@@ -4,7 +4,7 @@ import { UsersService } from './users.service';
 import { UsersController } from './users.controller';
 import { JwtTokenService } from './jwt/jwt.service';
 import { MongooseModule } from '@nestjs/mongoose';
-import { User, UserSchema } from './schemas/user.schema';
+import { User, UserSchema } from './database/schemas/user.schema';
 import * as bcrypt from 'bcrypt';
 import { MailerModule } from '@nestjs-modules/mailer';
 import { MailService } from './mail/mail.service';
@@ -12,7 +12,7 @@ import { HandlebarsAdapter } from '@nestjs-modules/mailer/dist/adapters/handleba
 import { join } from 'path';
 import { EncryptService } from './encrypt/encrypt.service';
 import * as dotenv from 'dotenv';
-import { DBService } from './db.service';
+import { DBService } from './database/db.service';
 dotenv.config();
 
 @Module({
@@ -38,20 +38,24 @@ dotenv.config();
         },
       },
     ]),
-
     CacheModule.register({
-      store: redisStore,
-      url: process.env.REDIS_URL,
+      host: process.env.REDIS_HOST,
+      port: process.env.REDIS_PORT,
+      password: process.env.REDIS_PASSWORD,
+      store: redisStore.redisStore,
     }),
     MailerModule.forRootAsync({
       useFactory: async () => ({
         transport: {
-          service: process.env.SMTP_SERVICE,
           host: process.env.SMTP_HOST,
           port: Number(process.env.SMTP_PORT),
+          secure: true,
           auth: {
             user: process.env.SMTP_USER,
             pass: process.env.SMTP_PASS,
+          },
+          tls: {
+            ciphers: 'SSLv3',
           },
         },
         defaults: {
