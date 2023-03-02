@@ -16,7 +16,8 @@ async function bootstrap() {
   );
 
   app.useGlobalFilters(new AllExceptionsFilter());
-
+  app.setGlobalPrefix('api/v1/auth');
+  
   const config = new DocumentBuilder()
     .setTitle('Authman API')
     .setDescription('Documentation for the Authman Project')

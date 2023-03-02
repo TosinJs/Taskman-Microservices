@@ -148,7 +148,7 @@ func Setup() {
 	//Routes Setup
 	r := gin.New()
 	r.Use(cors.Default())
-	v1 := r.Group("/api/v1")
+	v1 := r.Group("/api/v1/notifications")
 
 	routes.NotificationRoutes(v1, notifSVC, notifTokenSVC, authSVC, validationSVC)
 

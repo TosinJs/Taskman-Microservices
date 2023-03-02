@@ -5,6 +5,6 @@ COPY go.sum .
 RUN go mod download
 COPY . . 
 RUN go build -o /docker-rm-service
-ENV PORT=2000
+ENV PORT=8080
 EXPOSE $PORT
 CMD ["/docker-rm-service"]

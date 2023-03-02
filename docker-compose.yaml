@@ -1,16 +1,14 @@
 version: '3'
 services:
-  # nginx: 
-  #   image: reverseproxy
-  #   build: ./reverseproxy
-  #   ports:
-  #     - "8080:8080"
-  #     - "8081:8081"
-  #     - "8082:8082"
-  #   depends_on:
-  #     - backend-authman
-  #     - backend-taskman
-  #     - backend-notifications
+  nginx: 
+    image: reverseproxy
+    build: ./reverseproxy
+    ports:
+      - "8080:8080"
+    depends_on:
+      - backend-authman
+      - backend-taskman
+      - backend-notifications
   mongo:
     image: mongo
     restart: always
@@ -41,8 +39,6 @@ services:
   backend-authman:
     image: backend-authman
     build: ./authman-service
-    ports:
-      - "80:8080"
     depends_on:
       - mongo
       - redis
@@ -52,8 +48,10 @@ services:
   backend-taskman:
     image: backend-taskman
     build: ./reminder-service
-    ports:
-      - "81:2000"
+    volumes:
+      - type: bind
+        source: ./app.env
+        target: /app/app.env
     depends_on:
       authman:
         condition: service_started
@@ -65,8 +63,13 @@ services:
   backend-notifications:
     image: backend-notifications
     build: ./notification-service
-    ports:
-      - "82:4000"
+    volumes:
+      - type: bind
+        source: ./app.env
+        target: /app/app.env
+      - type: bind
+        source: ./taskman-firebase-adminsdk.json
+        target: /app/taskman-firebase-adminsdk.json
     depends_on:
       authman:
         condition: service_started
