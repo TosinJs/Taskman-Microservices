@@ -21,5 +21,22 @@ jobs:
         username: ${{ secrets.DOCKERHUB_USERNAME }}
         password: ${{ secrets.DOCKERHUB_TOKEN }}
         
-    - name: Build the Docker image
-      run: docker-compose build --push
+    - name: Build the First Docker Image
+      run: docker build -t authman-service ./authman-service --tag ${{ secrets.DOCKERHUB_USERNAME }}/authman-service:v1
+    - name: Docker Push
+      run: docker push ${{ secrets.DOCKERHUB_USERNAME }}/authman-service:v1
+      
+    - name: Build the Second Docker Image
+      run: docker build -t notification-service ./notification-service --tag ${{ secrets.DOCKERHUB_USERNAME }}/notification-service:v1
+    - name: Docker Push
+      run: docker push ${{ secrets.DOCKERHUB_USERNAME }}/notification-service:v1
+      
+    - name: Build the Third Docker Image
+      run: docker build -t reminder-service ./reminder-service --tag ${{ secrets.DOCKERHUB_USERNAME }}/reminder-service:v1
+    - name: Docker Push
+      run: docker push ${{ secrets.DOCKERHUB_USERNAME }}/reminder-service:v1
+      
+    - name: Build the Proxy Server Docker Image
+      run: docker build -t reverseproxy ./reverseproxy --tag ${{ secrets.DOCKERHUB_USERNAME }}/reverseproxy:v1
+    - name: Docker Push
+      run: docker push ${{ secrets.DOCKERHUB_USERNAME }}/reverseproxy:v1
